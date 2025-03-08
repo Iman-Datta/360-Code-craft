@@ -1,72 +1,99 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const cors = require("cors");
-require("dotenv").config();
+require('dotenv').config();
+const express = require('express');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const { OpenAI } = require('openai');
+const cors = require('cors');
+const fs = require('fs');
+const PDFDocument = require('pdfkit');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const SECRET_KEY = "your_secret_key";
+const port = process.env.PORT || 5000;
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.use(express.json());
 app.use(cors());
 
-// MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/expenseTracker", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// Multer setup for file upload
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Upload PDF & Extract Text
+app.post('/upload', upload.single('pdf'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    try {
+        const text = await pdfParse(req.file.buffer);
+        const extractedText = text.text.trim();
+        if (!extractedText) return res.status(400).json({ error: 'Empty PDF content' });
+
+        // Summarize with OpenAI
+        const summary = await generateSummary(extractedText);
+        res.json({ summary });
+    } catch (error) {
+        console.error('Error processing PDF:', error);
+        res.status(500).json({ error: 'Error extracting text' });
+    }
 });
 
-// User Schema
-const userSchema = new mongoose.Schema({
-  username: String,
-  password: String,
-});
-const User = mongoose.model("User", userSchema);
+// Generate Summary
+async function generateSummary(text) {
+    const prompt = `Summarize the following text in bullet points:\n\n${text}`;
+    const response = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.5
+    });
+    return response.choices[0].message.content;
+}
 
-// Expense Schema
-const expenseSchema = new mongoose.Schema({
-  userId: String,
-  title: String,
-  amount: Number,
-});
-const Expense = mongoose.model("Expense", expenseSchema);
+// Generate Quiz
+app.post('/generate-quiz', async (req, res) => {
+    const { summary } = req.body;
+    if (!summary) return res.status(400).json({ error: 'No summary provided' });
 
-// User Signup
-app.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ username, password: hashedPassword });
-  await user.save();
-  res.json({ message: "User registered successfully" });
-});
-
-// User Login
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(400).json({ message: "Invalid credentials" });
-  }
-  const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
-  res.json({ token });
+    try {
+        const quiz = await generateQuiz(summary);
+        res.json({ quiz });
+    } catch (error) {
+        console.error('Quiz generation error:', error);
+        res.status(500).json({ error: 'Quiz generation failed' });
+    }
 });
 
-// Add Expense
-app.post("/expense", async (req, res) => {
-  const { userId, title, amount } = req.body;
-  const expense = new Expense({ userId, title, amount });
-  await expense.save();
-  res.json({ message: "Expense added" });
+async function generateQuiz(summary) {
+    const prompt = `Create a 10-question multiple-choice quiz based on the following summary. Format: JSON with "questions" (array of objects), each containing "question", "options" (array of 4), and "answer":\n\n${summary}`;
+    const response = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7
+    });
+
+    return JSON.parse(response.choices[0].message.content);
+}
+
+// Download Summary & Quiz as PDF
+app.post('/download-pdf', (req, res) => {
+    const { summary, quiz } = req.body;
+    if (!summary || !quiz) return res.status(400).json({ error: 'Missing data' });
+
+    const doc = new PDFDocument();
+    const filename = `summary_quiz.pdf`;
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/pdf');
+
+    doc.pipe(res);
+    doc.fontSize(16).text('Summary:', { underline: true }).moveDown();
+    doc.fontSize(12).text(summary).moveDown(2);
+
+    doc.fontSize(16).text('Quiz:', { underline: true }).moveDown();
+    quiz.questions.forEach((q, index) => {
+        doc.fontSize(12).text(`${index + 1}. ${q.question}`).moveDown(0.5);
+        q.options.forEach((opt, i) => doc.text(`   ${String.fromCharCode(65 + i)}. ${opt}`).moveDown(0.2));
+        doc.moveDown(1);
+    });
+
+    doc.end();
 });
 
-// Get Total Expenses
-app.get("/expenses/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const expenses = await Expense.find({ userId });
-  const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-  res.json({ expenses, total });
-});
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));
