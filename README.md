@@ -1,69 +1,19 @@
-# Welcome to your Lovable project
+Gistify: PDF Summarizer & Quiz Generator
 
-## Project info
+Gistify is a web-based platform that uses AI to help users extract key insights from PDFs, generating structured summaries and quizzes to streamline the learning process.
 
-**URL**: https://lovable.dev/projects/c01936a5-f569-4dfd-86b9-80557df2f7fa
+Key Features:
 
-## How can I edit this code?
+- PDF Upload: Easily upload PDF files via drag-and-drop or manual selection.
+- Text Extraction: Utilizes pdf-parse to extract content from PDFs.
+- AI Summarization: Leveraging OpenAI's GPT API to generate concise, bullet-point summaries.
+- MCQ Generation: Automatically creates 10 multiple-choice questions based on the summary.
+- Instant Feedback: Color-coded response indicators for correct/incorrect answers.
+- Timer per Question: 30-second countdown per question, auto-skipping on timeout.
+- Results & Explanations: Detailed results page with explanations for each question.
+- Downloadable Reports: Summaries and quizzes can be downloaded as PDFs.
 
-There are several ways of editing your application.
+Tech Stack:
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/c01936a5-f569-4dfd-86b9-80557df2f7fa) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c01936a5-f569-4dfd-86b9-80557df2f7fa) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- Frontend: React for UI development, Tailwind CSS for styling, and Shadcn/ui for components.
+- Backend: Node.js & Express for API handling, Firebase Firestore for database storage, pdf-parse for text extraction, and OpenAI GPT API for summarization & quiz generation.
