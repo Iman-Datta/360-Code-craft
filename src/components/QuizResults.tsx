@@ -1,8 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useAppContext } from '@/context/AppContext';
 import { downloadAsFile } from '@/utils/pdfUtils';
@@ -21,7 +19,6 @@ const QuizResults: React.FC = () => {
   const [scorePercentage, setScorePercentage] = useState<number>(0);
   
   useEffect(() => {
-    // Calculate score with animation
     const correctAnswers = userAnswers.filter(answer => answer.isCorrect).length;
     const targetPercentage = Math.round((correctAnswers / questions.length) * 100);
     
@@ -44,10 +41,10 @@ const QuizResults: React.FC = () => {
   const totalIncorrect = userAnswers.length - totalCorrect - totalSkipped;
   
   const getScoreColor = () => {
-    if (scorePercentage >= 80) return 'text-success';
-    if (scorePercentage >= 60) return 'text-primary';
-    if (scorePercentage >= 40) return 'text-orange-500';
-    return 'text-destructive';
+    if (scorePercentage >= 80) return 'text-[#563925]';
+    if (scorePercentage >= 60) return 'text-[#C3AC98]';
+    if (scorePercentage >= 40) return 'text-[#B6ACA4]';
+    return 'text-red-600';
   };
   
   const handleRestartQuiz = () => {
@@ -60,10 +57,8 @@ const QuizResults: React.FC = () => {
   };
   
   const handleDownload = () => {
-    // Generate content for download
     let content = `# Summary and Quiz Results for ${fileName}\n\n`;
     
-    // Add summary
     content += `## Summary\n\n`;
     summary.forEach((section, index) => {
       content += `### ${section.title}\n\n`;
@@ -73,14 +68,12 @@ const QuizResults: React.FC = () => {
       content += '\n';
     });
     
-    // Add quiz results
     content += `## Quiz Results\n\n`;
     content += `Score: ${totalCorrect}/${questions.length} (${scorePercentage}%)\n`;
     content += `Correct answers: ${totalCorrect}\n`;
     content += `Incorrect answers: ${totalIncorrect}\n`;
     content += `Skipped questions: ${totalSkipped}\n\n`;
     
-    // Add questions and answers
     content += `## Questions and Answers\n\n`;
     questions.forEach((question, index) => {
       const userAnswer = userAnswers.find(a => a.questionIndex === index);
@@ -111,16 +104,15 @@ const QuizResults: React.FC = () => {
       content += `---\n\n`;
     });
     
-    // Download as text file
     downloadAsFile(content, `${fileName.replace('.pdf', '')}_summary_quiz.txt`);
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8 animate-fade-in">
-      <Card className="glass-card overflow-hidden">
+      <Card className="bg-[#B6ACA4] text-[#563925] shadow-lg overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-light mb-6">Quiz Results</h1>
+            <h1 className="text-3xl font-light mb-6 text-[#563925]">Quiz Results</h1>
             
             <div className="relative inline-block w-48 h-48 mb-4">
               <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -128,7 +120,7 @@ const QuizResults: React.FC = () => {
                   cx="50"
                   cy="50"
                   r="45"
-                  stroke="#e5e7eb"
+                  stroke="#C3AC98"
                   strokeWidth="8"
                   fill="none"
                 />
@@ -154,7 +146,7 @@ const QuizResults: React.FC = () => {
             
             <div className="flex justify-center gap-8 mb-4">
               <div className="text-center">
-                <div className="flex items-center gap-1 text-success">
+                <div className="flex items-center gap-1 text-[#563925]">
                   <CheckCircleIcon className="h-4 w-4" />
                   <span>Correct</span>
                 </div>
@@ -162,7 +154,7 @@ const QuizResults: React.FC = () => {
               </div>
               
               <div className="text-center">
-                <div className="flex items-center gap-1 text-destructive">
+                <div className="flex items-center gap-1 text-red-600">
                   <XCircleIcon className="h-4 w-4" />
                   <span>Incorrect</span>
                 </div>
@@ -170,7 +162,7 @@ const QuizResults: React.FC = () => {
               </div>
               
               <div className="text-center">
-                <div className="flex items-center gap-1 text-muted-foreground">
+                <div className="flex items-center gap-1 text-gray-500">
                   <HelpCircleIcon className="h-4 w-4" />
                   <span>Skipped</span>
                 </div>
@@ -179,87 +171,13 @@ const QuizResults: React.FC = () => {
             </div>
           </div>
           
-          <Separator className="mb-8" />
-          
-          <div className="space-y-6 mb-8">
-            <h2 className="text-xl font-medium mb-4">Question Review</h2>
-            
-            {questions.map((question, index) => {
-              const userAnswer = userAnswers.find(a => a.questionIndex === index);
-              
-              return (
-                <div
-                  key={index}
-                  className="border rounded-lg p-4 transition-all animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className="flex justify-between mb-2">
-                    <h3 className="font-medium">Question {index + 1}</h3>
-                    {userAnswer?.isCorrect ? (
-                      <span className="text-success flex items-center gap-1">
-                        <CheckCircleIcon className="h-4 w-4" />
-                        Correct
-                      </span>
-                    ) : userAnswer?.selectedOption === null ? (
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <HelpCircleIcon className="h-4 w-4" />
-                        Skipped
-                      </span>
-                    ) : (
-                      <span className="text-destructive flex items-center gap-1">
-                        <XCircleIcon className="h-4 w-4" />
-                        Incorrect
-                      </span>
-                    )}
-                  </div>
-                  
-                  <p className="mb-3">{question.question}</p>
-                  
-                  <div className="space-y-2 mb-3">
-                    {question.options.map((option, optIndex) => {
-                      const isCorrect = optIndex === question.correctAnswer;
-                      const wasSelected = userAnswer?.selectedOption === optIndex;
-                      
-                      let optionClassName = "p-2 rounded text-sm flex items-center gap-2";
-                      
-                      if (isCorrect) {
-                        optionClassName += " bg-success/10 text-success";
-                      } else if (wasSelected) {
-                        optionClassName += " bg-destructive/10 text-destructive";
-                      } else {
-                        optionClassName += " text-muted-foreground";
-                      }
-                      
-                      return (
-                        <div key={optIndex} className={optionClassName}>
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                            isCorrect ? 'bg-success text-white' : wasSelected ? 'bg-destructive text-white' : 'border text-muted-foreground'
-                          }`}>
-                            {String.fromCharCode(65 + optIndex)}
-                          </div>
-                          <div>{option}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  <div className="p-3 bg-secondary/30 rounded text-sm">
-                    <div className="flex items-center gap-1 text-primary mb-1">
-                      <HelpCircleIcon className="h-4 w-4" />
-                      <span className="font-medium">Explanation</span>
-                    </div>
-                    <p className="text-muted-foreground">{question.explanation}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <Separator className="mb-8 border-[#C3AC98]" />
           
           <div className="flex flex-wrap gap-3 justify-center">
             <Button
               variant="outline"
               onClick={handleNewUpload}
-              className="transition-all gap-2"
+              className="transition-all gap-2 border-[#563925] text-[#563925]"
             >
               <RotateCcwIcon className="h-4 w-4" />
               <span>Upload New PDF</span>
@@ -267,7 +185,7 @@ const QuizResults: React.FC = () => {
             
             <Button
               onClick={handleRestartQuiz}
-              className="transition-all gap-2"
+              className="transition-all gap-2 bg-[#563925] text-white"
             >
               <RefreshCwIcon className="h-4 w-4" />
               <span>Retake Quiz</span>
@@ -276,7 +194,7 @@ const QuizResults: React.FC = () => {
             <Button
               variant="secondary"
               onClick={handleDownload}
-              className="transition-all gap-2"
+              className="transition-all gap-2 bg-[#C3AC98] text-[#563925]"
             >
               <DownloadIcon className="h-4 w-4" />
               <span>Download Summary & Quiz</span>
