@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useAppContext } from '@/context/AppContext';
 import { generateQuiz } from '@/utils/apiUtils';
-import { BookIcon, BrainIcon } from 'lucide-react';
+import { BookIcon, BrainIcon, ArrowRightIcon } from 'lucide-react';
 
 const Summary: React.FC = () => {
   const { toast } = useToast();
@@ -48,35 +49,35 @@ const Summary: React.FC = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8 animate-fade-in">
-      <Card className="glass-card overflow-hidden bg-[#B6ACA4] border border-[#563925]">
+      <Card className="glass-card overflow-hidden">
         <div className="p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-full bg-[#563925]/10">
-              <BookIcon className="h-5 w-5 text-[#563925]" />
+            <div className="p-2 rounded-full bg-primary/10">
+              <BookIcon className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-medium text-[#563925]">Summary</h2>
-              <p className="text-sm text-[#C3AC98]">Generated from {fileName}</p>
+              <h2 className="text-xl font-medium">Summary</h2>
+              <p className="text-sm text-muted-foreground">Generated from {fileName}</p>
             </div>
           </div>
           
-          <Separator className="mb-6 border-[#563925]" />
+          <Separator className="mb-6" />
           
           <div className="space-y-8 mb-8">
             {summary.map((section, index) => (
               <div key={index} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="mb-3">
-                  <Badge variant="outline" className="bg-[#C3AC98] text-[#563925] mb-2">
+                  <Badge variant="outline" className="bg-secondary/50 text-foreground mb-2">
                     Section {index + 1}
                   </Badge>
-                  <h3 className="text-xl font-medium text-[#563925]">{section.title}</h3>
+                  <h3 className="text-xl font-medium">{section.title}</h3>
                 </div>
                 
                 <ul className="space-y-2 pl-6">
                   {section.points.map((point, pointIndex) => (
                     <li 
                       key={pointIndex} 
-                      className="list-disc text-[#563925] animate-slide-up" 
+                      className="list-disc text-foreground/90 animate-slide-up" 
                       style={{ animationDelay: `${(index * 100) + (pointIndex * 50)}ms` }}
                     >
                       {point}
@@ -91,7 +92,7 @@ const Summary: React.FC = () => {
             <Button 
               variant="outline" 
               onClick={() => setCurrentState('upload')}
-              className="transition-all border-[#563925] text-[#563925] hover:bg-[#C3AC98]"
+              className="transition-all"
             >
               Upload Another PDF
             </Button>
@@ -99,21 +100,21 @@ const Summary: React.FC = () => {
             <Button
               onClick={handleGenerateQuiz}
               disabled={isProcessing}
-              className="transition-all gap-2 bg-[#563925] text-[#C3AC98] hover:bg-[#C3AC98] hover:text-[#563925]"
+              className="transition-all gap-2"
             >
               {isProcessing ? (
                 <>
                   <span>Generating Quiz</span>
                   <div className="loading-dots">
-                    <div className="w-1 h-1 bg-[#C3AC98]"></div>
-                    <div className="w-1 h-1 bg-[#C3AC98]"></div>
-                    <div className="w-1 h-1 bg-[#C3AC98]"></div>
+                    <div className="w-1 h-1"></div>
+                    <div className="w-1 h-1"></div>
+                    <div className="w-1 h-1"></div>
                   </div>
                 </>
               ) : (
                 <>
                   <span>Generate Quiz</span>
-                  <BrainIcon className="h-4 w-4 text-[#C3AC98]" />
+                  <BrainIcon className="h-4 w-4" />
                 </>
               )}
             </Button>
